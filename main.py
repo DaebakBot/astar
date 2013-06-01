@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
     grid = GridMap(40, 20)
     grid.randomize()
-    print 'This grid map will be used.'
+    print 'This grid map will be used'
     grid.print_grid()
     
     bfs = BestFirst(grid)
