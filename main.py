@@ -11,7 +11,7 @@ from gridmap import GridNode, GridMap
 class Algo():
     def __init__(self, grid):
         self.visited = []
-        self.calctime = 0
+        self.calctime = -1
         self.grid = grid
         self.result = []
 
@@ -32,11 +32,11 @@ class Algo():
 
 class AStar(Algo):
     def __init__(self, grid):
-        self.openset = []
-        self.closedset = []
+        self.openset = dict()
+        self.closedset = dict()
         self.visited = []
         self.result = []
-        self.calctime = 0
+        self.calctime = -1
         self.grid = grid
 
     def calc_path(self):

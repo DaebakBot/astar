@@ -10,6 +10,7 @@ class GridNode():
         self.in_result = False
         self.is_start = False
         self.is_goal = False
+        self.previous = None
 
 
 class GridMap():
