@@ -11,24 +11,37 @@ class GridNode():
         self.is_start = False
         self.is_goal = False
         self.previous = None
+        self.visited = False
+        self.mindistance = float('inf')
+        self.h_value = float('inf')
+
+    def __lt__(self, other):
+        return self.h_value < other.h_value
+
+    def __cmp__(self, other):
+        return cmp(self.h_value, other.h_value)
 
 
 class GridMap():
     "Square grid map"
-    def __init__(self, row, col, diagonal=False):
+    def __init__(self, col, row, diagonal=False):
         "make row * col gridmap. from (0, 0) to (row - 1, col - 1)"
         self.can_diagonal_move = diagonal
-        self.matrix = [[GridNode(i, j) for i in xrange(row)] for j in xrange(col)]
+        self.matrix = [[GridNode(i, j) for i in xrange(col)] for j in xrange(row)]
+        self.row = row
+        self.col = col
+        self.start_set = False
+        self.goal_set = False
     
     def put_single_obs(self, x, y):
         "put an obstacle on (x, y)"
-        print 'Node that will be changed to an obstacle: ' + str((x, y))
+        #print 'Node that will be changed to an obstacle: ' + str((x, y))
         self.matrix[y][x].is_obs = True
 
-    def put_multiple_obs(self, *args):
-        print 'Nodes that will be changed to obstacles:',
-        print args
-        for x, y in args:
+    def put_multiple_obs(self, arg_list):
+        #print 'Nodes that will be changed to obstacles:',
+        #print arg_list
+        for x, y in arg_list:
         	self.matrix[y][x].is_obs = True
 
     def remove_single_obs(self, x, y):
@@ -41,10 +54,12 @@ class GridMap():
     def set_start(self, x, y):
         self.matrix[y][x].is_start = True
         self.start = self.matrix[y][x]
+        self.start_set = True
 
     def set_goal(self, x, y):
         self.matrix[y][x].is_goal = True
         self.goal = self.matrix[y][x]
+        self.goal_set = True
 
     def randomize(self):
         from random import random, choice
@@ -62,18 +77,20 @@ class GridMap():
         g.is_goal = True
         self.start = s
         self.goal = g
+        self.start_set = True
+        self.goal_set = True
 
     def print_grid(self):
         for row in self.matrix:
         	for node in row:
         		if node.is_obs:
-        		    print '\033[31m#\033[0m',
+        		    print '\033[1m\033[31m#\033[0m',
         		elif node.is_start:
-        		    print '\033[36mS\033[0m',
+        		    print '\033[1m\033[33mS\033[0m',
         		elif node.is_goal:
-        		    print '\033[36mG\033[0m',
+        		    print '\033[1m\033[33mG\033[0m',
         		elif node.in_result:
-        		    print '\033[32m*\033[0m',
+        		    print '\033[1m\033[32m*\033[0m',
         		else:
         			print '\033[37mo\033[0m',
         	print
@@ -94,6 +111,12 @@ class GridMap():
         			f.write('o ')
         f.close()
 
+    def print_mindistances(self):
+        for row in self.matrix:
+            for node in row:
+                print node.mindistance,
+            print
+
 
 if __name__ == '__main__':
     grid = GridMap(30, 15)
@@ -105,3 +128,5 @@ if __name__ == '__main__':
     grid = GridMap(40, 20)
     grid.randomize()
     grid.print_grid()
+    print grid.row
+    print grid.col
