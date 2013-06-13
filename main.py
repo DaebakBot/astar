@@ -68,13 +68,11 @@ class AStar(Algo):
         start.mindistance = 0.0
         start.h_value = self.heuristic(start)
         priority_queue = [start]
-        closed = []
         
         while priority_queue:
             u = heapq.heappop(priority_queue)
             self.visited.append(u)
             u.visited = True
-            closed.append(u)
 
             if u == self.grid.goal:
                 break
