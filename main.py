@@ -68,11 +68,13 @@ class AStar(Algo):
         start.mindistance = 0.0
         start.h_value = self.heuristic(start)
         priority_queue = [start]
+        closed = dict()
         
         while priority_queue:
             u = heapq.heappop(priority_queue)
             self.visited.append(u)
             u.visited = True
+            closed[u.x, u.y] = u
 
             if u == self.grid.goal:
                 break
@@ -82,12 +84,29 @@ class AStar(Algo):
                 g = weight + u.mindistance
                 h = self.heuristic(target)
                 f = g + h
-                if not target.is_obs and g < target.mindistance:
-                    target.h_value = f
-                    target.mindistance = g
-                    target.previous = u
-                    if target not in priority_queue:
+                if not target.is_obs:
+                    if target in priority_queue and g < target.mindistance:
+                        target.mindistance = g
+                        target.h_value = f
+                        target.previous = u
+                    if (target.x, target.y) in closed: 
+                        if g < target.mindistance:
+                            del closed[target.x, target.y]
+                    #    else: 
+                    #        continue
+                    if target not in priority_queue and (target.x, target.y) not in closed:
+                        target.mindistance = g
+                        target.h_value = f
+                        target.previous = u
                         heapq.heappush(priority_queue, target)
+                    #if target in closed and g >= target.mindistance:
+                    #    continue
+                    #if target not in priority_queue or g < target.mindistance:
+                    #    target.h_value = f
+                    #    target.mindistance = g
+                    #    target.previous = u
+                    #    if target not in priority_queue:
+                    #        heapq.heappush(priority_queue, target)
 
         self.calctime = time.time() - t
         u = self.grid.goal
@@ -218,10 +237,6 @@ if __name__ == '__main__':
     #bfs.grid.set_goal(ran_pick[-1][0], ran_pick[-1][1])
     dijk.grid.set_goal(ran_pick[-1][0], ran_pick[-1][1])
     astar.grid.set_goal(ran_pick[-1][0], ran_pick[-1][1])
-
-    #bfs.grid.randomize()
-    #dijk.grid.randomize()
-    #astar.grid.randomize()
 
     #print 'calc b'
     #bfs.calc_path()
