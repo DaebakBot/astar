@@ -165,19 +165,21 @@ class BestFirst(Algo):
         t = time.time()
         start = self.grid.start
         start.mindistance = 0.0
-        start.h_value = 0.0
+        start.h_value = self.heuristic(start)
         priority_queue = [start]
+        closed = dict()
 
         while priority_queue:
             u = heapq.heappop(priority_queue)
             self.visited.append(u)
+            closed[u.x, u.y] = u
 
             if u == self.grid.goal:
                 break
             
             for target in self.get_neighbors(u):
                 h = self.heuristic(target)
-                if not target.is_obs and not target.visited:
+                if not target.is_obs and (target.x, target.y) not in closed:
                     if target in priority_queue:
                         priority_queue.remove(target)
                     target.mindistance = h
@@ -219,35 +221,35 @@ if __name__ == '__main__':
 
     ran_pick = make_random_pick(int(sys.argv[1]), int(sys.argv[2]))
 
-    #bfs = BestFirst(GridMap(int(sys.argv[1]), int(sys.argv[2])))
+    bfs = BestFirst(GridMap(int(sys.argv[1]), int(sys.argv[2])))
     dijk = Dijkstra(GridMap(int(sys.argv[1]), int(sys.argv[2])))
     astar = AStar(GridMap(int(sys.argv[1]), int(sys.argv[2])))
 
     while len(ran_pick) < 2:
         ran_pick = make_random_pick(int(sys.argv[1]), int(sys.argv[2]))
 
-    #bfs.grid.put_multiple_obs(ran_pick[1:-2])
+    bfs.grid.put_multiple_obs(ran_pick[1:-2])
     dijk.grid.put_multiple_obs(ran_pick[1:-2])
     astar.grid.put_multiple_obs(ran_pick[1:-2])
 
-    #bfs.grid.set_start(ran_pick[0][0], ran_pick[0][1])
+    bfs.grid.set_start(ran_pick[0][0], ran_pick[0][1])
     dijk.grid.set_start(ran_pick[0][0], ran_pick[0][1])
     astar.grid.set_start(ran_pick[0][0], ran_pick[0][1])
 
-    #bfs.grid.set_goal(ran_pick[-1][0], ran_pick[-1][1])
+    bfs.grid.set_goal(ran_pick[-1][0], ran_pick[-1][1])
     dijk.grid.set_goal(ran_pick[-1][0], ran_pick[-1][1])
     astar.grid.set_goal(ran_pick[-1][0], ran_pick[-1][1])
 
-    #print 'calc b'
-    #bfs.calc_path()
+    print 'calc b'
+    bfs.calc_path()
     print 'calc d'
     dijk.calc_path()
     print 'calc a'
     astar.calc_path()
 
-    #print
-    #print 'Result of Best-First-Search'
-    #bfs.print_result()
+    print
+    print 'Result of Best-First-Search'
+    bfs.print_result(printmap)
     print
     print 'Result of Dijkstra algorithm'
     dijk.print_result(printmap)
