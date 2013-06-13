@@ -69,7 +69,7 @@ class AStar(Algo):
         if debug:
             filename.write('\nin A*\n')
 
-        t = time.time() # saves start time
+        t = time.time()  # saves start time
 
         start = self.grid.start
         start.mindistance = 0.0
@@ -131,7 +131,7 @@ class Dijkstra(Algo):
         if not self.grid.start_set:
             print 'please set start and goal, or randomize grid'
             return
-        
+
         if debug:
             filename.write('\nin Dijkstra\n')
         
