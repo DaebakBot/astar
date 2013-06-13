@@ -66,13 +66,15 @@ class AStar(Algo):
         t = time.time()
         start = self.grid.start
         start.mindistance = 0.0
-        start.h_value = 0.0
+        start.h_value = self.heuristic(start)
         priority_queue = [start]
+        closed = []
         
         while priority_queue:
             u = heapq.heappop(priority_queue)
             self.visited.append(u)
             u.visited = True
+            closed.append(u)
 
             if u == self.grid.goal:
                 break
@@ -83,12 +85,11 @@ class AStar(Algo):
                 h = self.heuristic(target)
                 f = g + h
                 if not target.is_obs and g < target.mindistance:
-                    if target in priority_queue:
-                        priority_queue.remove(target)
-                    target.mindistance = g
                     target.h_value = f
+                    target.mindistance = g
                     target.previous = u
-                    heapq.heappush(priority_queue, target)
+                    if target not in priority_queue:
+                        heapq.heappush(priority_queue, target)
 
         self.calctime = time.time() - t
         u = self.grid.goal
@@ -201,7 +202,7 @@ if __name__ == '__main__':
 
     ran_pick = make_random_pick(int(sys.argv[1]), int(sys.argv[2]))
 
-    bfs = BestFirst(GridMap(int(sys.argv[1]), int(sys.argv[2])))
+    #bfs = BestFirst(GridMap(int(sys.argv[1]), int(sys.argv[2])))
     dijk = Dijkstra(GridMap(int(sys.argv[1]), int(sys.argv[2])))
     astar = AStar(GridMap(int(sys.argv[1]), int(sys.argv[2])))
 
@@ -209,14 +210,14 @@ if __name__ == '__main__':
         ran_pick = make_random_pick(int(sys.argv[1]), int(sys.argv[2]))
 
     #bfs.grid.put_multiple_obs(ran_pick[1:-2])
-    #dijk.grid.put_multiple_obs(ran_pick[1:-2])
-    #astar.grid.put_multiple_obs(ran_pick[1:-2])
+    dijk.grid.put_multiple_obs(ran_pick[1:-2])
+    astar.grid.put_multiple_obs(ran_pick[1:-2])
 
-    bfs.grid.set_start(ran_pick[0][0], ran_pick[0][1])
+    #bfs.grid.set_start(ran_pick[0][0], ran_pick[0][1])
     dijk.grid.set_start(ran_pick[0][0], ran_pick[0][1])
     astar.grid.set_start(ran_pick[0][0], ran_pick[0][1])
 
-    bfs.grid.set_goal(ran_pick[-1][0], ran_pick[-1][1])
+    #bfs.grid.set_goal(ran_pick[-1][0], ran_pick[-1][1])
     dijk.grid.set_goal(ran_pick[-1][0], ran_pick[-1][1])
     astar.grid.set_goal(ran_pick[-1][0], ran_pick[-1][1])
 
@@ -224,16 +225,16 @@ if __name__ == '__main__':
     #dijk.grid.randomize()
     #astar.grid.randomize()
 
-    print 'calc b'
-    bfs.calc_path()
+    #print 'calc b'
+    #bfs.calc_path()
     print 'calc d'
     dijk.calc_path()
     print 'calc a'
     astar.calc_path()
 
-    print
-    print 'Result of Best-First-Search'
-    bfs.print_result()
+    #print
+    #print 'Result of Best-First-Search'
+    #bfs.print_result()
     print
     print 'Result of Dijkstra algorithm'
     dijk.print_result(printmap)

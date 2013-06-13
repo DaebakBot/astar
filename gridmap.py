@@ -91,6 +91,8 @@ class GridMap():
         		    print '\033[1m\033[33mG\033[0m',
         		elif node.in_result:
         		    print '\033[1m\033[32m*\033[0m',
+        		elif node.visited:
+        		    print '\033[1m\033[34m@\033[0m',
         		else:
         			print '\033[37mo\033[0m',
         	print
