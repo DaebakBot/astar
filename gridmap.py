@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
 # gridmap.py
+# Author: 임희창, 박태헌
 
 
 class GridNode(object):
@@ -42,12 +43,10 @@ class GridMap():
     
     def put_single_obs(self, x, y):
         "put an obstacle on (x, y)"
-        #print 'Node that will be changed to an obstacle: ' + str((x, y))
         self.matrix[y][x].is_obs = True
 
     def put_multiple_obs(self, arg_list):
-        #print 'Nodes that will be changed to obstacles:',
-        #print arg_list
+        "put multiple obstacles"
         for x, y in arg_list:
         	self.matrix[y][x].is_obs = True
 
@@ -69,6 +68,7 @@ class GridMap():
         self.goal_set = True
 
     def randomize(self):
+        "ramdomly make obstacles on gridmap and set start and goal"
         from random import random, choice
         notobs = []
         for row in self.matrix:
@@ -88,6 +88,7 @@ class GridMap():
         self.goal_set = True
 
     def print_grid(self):
+        "print gridmap pretty"
         for row in self.matrix:
         	for node in row:
         		if node.is_obs:
@@ -105,6 +106,7 @@ class GridMap():
         	print
 
     def save_grid(self, name='result.txt'):
+        "save gridmap in text file"
         f = open(name, 'a')
         for row in self.matrix:
         	for node in row:

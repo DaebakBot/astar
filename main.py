@@ -25,13 +25,14 @@ class Algo():
         if printmap:
             self.grid.print_grid()
 
-    def save_result(self, name='result.txt'):
+    def save_result(self, printmap, name='result.txt'):
         f = open(name, 'w')
         filename.write('Number of visited nodes: ' + str(len(self.visited)))
         filename.write('\n')
         filename.write('Calculate time: ' + str(self.calctime) + '\n')
         f.close()
-        self.grid.save_grid(name)
+        if printmap:
+            self.grid.save_grid(name)
 
     def get_neighbors(self, vertex):
         if self.grid.can_diagonal_move:
@@ -68,7 +69,7 @@ class AStar(Algo):
         if debug:
             filename.write('\nin A*\n')
 
-        t = time.time()
+        t = time.time() # saves start time
 
         start = self.grid.start
         start.mindistance = 0.0
@@ -113,6 +114,7 @@ class AStar(Algo):
                         heapq.heappush(openset, target)
 
         self.calctime = time.time() - t
+
         u = self.grid.goal
         while u:
             u.in_result = True
