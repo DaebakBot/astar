@@ -26,9 +26,9 @@ class Algo():
 
     def save_result(self, name='result.txt'):
         f = open(name, 'w')
-        f.write('Number of visited nodes: ' + str(len(self.visited)))
-        f.write('\n')
-        f.write('Calculate time: ' + str(self.calctime) + '\n')
+        filename.write('Number of visited nodes: ' + str(len(self.visited)))
+        filename.write('\n')
+        filename.write('Calculate time: ' + str(self.calctime) + '\n')
         f.close()
         self.grid.save_grid(name)
 
@@ -59,54 +59,52 @@ class Algo():
 
 
 class AStar(Algo):
-    def calc_path(self):
+    def calc_path(self, debug, filename):
         if not self.grid.start_set:
             print 'please set start and goal, or randomize'
-            return;
+            return
+        if debug:
+            filename.write('\nin A*\n')
         t = time.time()
         start = self.grid.start
         start.mindistance = 0.0
         start.h_value = self.heuristic(start)
-        priority_queue = [start]
-        closed = dict()
-        
-        while priority_queue:
-            u = heapq.heappop(priority_queue)
+        openset = [start]
+        closedset = dict()
+
+        while openset:
+            u = heapq.heappop(openset)
             self.visited.append(u)
             u.visited = True
-            closed[u.x, u.y] = u
+            closedset[u.x, u.y] = u
+
+            if debug:
+                filename.write('u: ' + str(u.x) + ', ' + str(u.y))
+                filename.write(' ' + str(time.time()) + '\n')
 
             if u == self.grid.goal:
                 break
-            
+
             for target in self.get_neighbors(u):
+                if debug:
+                    filename.write('target: ' + str(target.x))
+                    filename.write(', ' + str(target.y))
+                    filename.write(' ' + str(time.time()) + '\n')
                 weight = 1.0
                 g = weight + u.mindistance
                 h = self.heuristic(target)
                 f = g + h
                 if not target.is_obs:
-                    if target in priority_queue and g < target.mindistance:
-                        target.mindistance = g
+                    if target in openset or (target.x, target.y) in closedset:
+                        if target.h_value > f:
+                            target.h_value = f
+                            target.mindistance = g
+                            target.previous = u
+                    else:
                         target.h_value = f
-                        target.previous = u
-                    if (target.x, target.y) in closed: 
-                        if g < target.mindistance:
-                            del closed[target.x, target.y]
-                    #    else: 
-                    #        continue
-                    if target not in priority_queue and (target.x, target.y) not in closed:
                         target.mindistance = g
-                        target.h_value = f
                         target.previous = u
-                        heapq.heappush(priority_queue, target)
-                    #if target in closed and g >= target.mindistance:
-                    #    continue
-                    #if target not in priority_queue or g < target.mindistance:
-                    #    target.h_value = f
-                    #    target.mindistance = g
-                    #    target.previous = u
-                    #    if target not in priority_queue:
-                    #        heapq.heappush(priority_queue, target)
+                        heapq.heappush(openset, target)
 
         self.calctime = time.time() - t
         u = self.grid.goal
@@ -116,29 +114,39 @@ class AStar(Algo):
             u = u.previous
 
     def heuristic(self, curr):
-        return (abs(curr.x - self.grid.goal.x) + abs(curr.y - self.grid.goal.y))
+        return (abs(curr.x - self.grid.goal.x) \
+                + abs(curr.y - self.grid.goal.y))
 
 
 class Dijkstra(Algo):
-    def calc_path(self):
+    def calc_path(self, debug, filename):
         if not self.grid.start_set:
             print 'please set start and goal, or randomize'
-            return;
+            return
+        if debug:
+            filename.write('\nin Dijkstra\n')
         t = time.time()
         start = self.grid.start
         start.mindistance = 0.0
         start.h_value = 0.0
         priority_queue = [start]
-        
+
         while priority_queue:
             u = heapq.heappop(priority_queue)
             self.visited.append(u)
             u.visited = True
+            if debug:
+                filename.write('u: ' + str(u.x) + ', ' + str(u.y))
+                filename.write(' ' + str(time.time()) + '\n')
 
             if u == self.grid.goal:
                 break
-            
+
             for target in self.get_neighbors(u):
+                if debug:
+                    filename.write('target: ' + str(target.x))
+                    filename.write(', ' + str(target.y))
+                    filename.write(' ' + str(time.time()) + '\n')
                 weight = 1.0
                 g = weight + u.mindistance
                 if not target.is_obs and g < target.mindistance:
@@ -158,10 +166,10 @@ class Dijkstra(Algo):
 
 
 class BestFirst(Algo):
-    def calc_path(self):
+    def calc_path(self, debug, filename):
         if not self.grid.start_set:
             print 'please set start and goal, or randomize'
-            return;
+            return
         t = time.time()
         start = self.grid.start
         start.mindistance = 0.0
@@ -176,7 +184,7 @@ class BestFirst(Algo):
 
             if u == self.grid.goal:
                 break
-            
+
             for target in self.get_neighbors(u):
                 h = self.heuristic(target)
                 if not target.is_obs and (target.x, target.y) not in closed:
@@ -201,23 +209,33 @@ class BestFirst(Algo):
 def usage():
     print 'usage'
 
+
 def make_random_pick(row, col):
     result = []
     for i in xrange(row):
         for j in xrange(col):
             if random() < 0.2:
-               result.append((i, j))
+                result.append((i, j))
     return result
 
-if __name__ == '__main__':
+
+def main():
     if len(sys.argv) < 2:
         usage()
         exit(0)
 
-    if sys.argv[3:]:
+    printmap = False
+    savefile = False
+    debugmode = False
+    f = None
+
+    if '-p' in sys.argv:
         printmap = True
-    else:
-        printmap = False
+    if '-s' in sys.argv:
+        savefile = True
+    if '--debug' in sys.argv or '-d' in sys.argv:
+        debugmode = True
+        f = open('debug.log', 'w')
 
     ran_pick = make_random_pick(int(sys.argv[1]), int(sys.argv[2]))
 
@@ -241,11 +259,11 @@ if __name__ == '__main__':
     astar.grid.set_goal(ran_pick[-1][0], ran_pick[-1][1])
 
     print 'calc b'
-    bfs.calc_path()
+    bfs.calc_path(debugmode, f)
     print 'calc d'
-    dijk.calc_path()
+    dijk.calc_path(debugmode, f)
     print 'calc a'
-    astar.calc_path()
+    astar.calc_path(debugmode, f)
 
     print
     print 'Result of Best-First-Search'
@@ -256,4 +274,12 @@ if __name__ == '__main__':
     print
     print 'Result of A* algorithm'
     astar.print_result(printmap)
-    #astar.grid.print_mindistances()
+
+    if debugmode:
+        f.close()
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        exit(1)
