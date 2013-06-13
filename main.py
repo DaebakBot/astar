@@ -70,13 +70,13 @@ class AStar(Algo):
         start.mindistance = 0.0
         start.h_value = self.heuristic(start)
         openset = [start]
-        closedset = dict()
+        closedset = set()
 
         while openset:
             u = heapq.heappop(openset)
             self.visited.append(u)
             u.visited = True
-            closedset[u.x, u.y] = u
+            closedset.add(u)
 
             if debug:
                 filename.write('u: ' + str(u.x) + ', ' + str(u.y))
@@ -95,12 +95,13 @@ class AStar(Algo):
                 h = self.heuristic(target)
                 f = g + h
                 if not target.is_obs:
-                    if target in openset or (target.x, target.y) in closedset:
-                        if target.h_value > f:
+                    if target.isopen or target in closedset:
+                        if target.mindistance > g:
                             target.h_value = f
                             target.mindistance = g
                             target.previous = u
                     else:
+                        target.isopen = True
                         target.h_value = f
                         target.mindistance = g
                         target.previous = u
@@ -175,19 +176,19 @@ class BestFirst(Algo):
         start.mindistance = 0.0
         start.h_value = self.heuristic(start)
         priority_queue = [start]
-        closed = dict()
+        closed = set()
 
         while priority_queue:
             u = heapq.heappop(priority_queue)
             self.visited.append(u)
-            closed[u.x, u.y] = u
+            closed.add(u)
 
             if u == self.grid.goal:
                 break
 
             for target in self.get_neighbors(u):
                 h = self.heuristic(target)
-                if not target.is_obs and (target.x, target.y) not in closed:
+                if not target.is_obs and target not in closed:
                     if target in priority_queue:
                         priority_queue.remove(target)
                     target.mindistance = h
@@ -279,7 +280,4 @@ def main():
         f.close()
 
 if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        exit(1)
+    main()

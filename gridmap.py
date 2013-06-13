@@ -3,7 +3,7 @@
 # gridmap.py
 
 
-class GridNode():
+class GridNode(object):
     def __init__(self, x, y):
         self.x, self.y = x, y
         self.is_obs = False
@@ -14,12 +14,19 @@ class GridNode():
         self.visited = False
         self.mindistance = float('inf')
         self.h_value = float('inf')
+        self.isopen = False
 
     def __lt__(self, other):
         return self.h_value < other.h_value
 
     def __cmp__(self, other):
         return cmp(self.h_value, other.h_value)
+
+    def __eq__(self, other):
+        return self.h_value == other.h_value
+
+    def __gt__(self, other):
+        return self.h_value > other.h_value
 
 
 class GridMap():
