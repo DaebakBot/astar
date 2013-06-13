@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
 # main.py
+# Authors: 임희창, 박태헌
 
 
 import time
@@ -61,11 +62,14 @@ class Algo():
 class AStar(Algo):
     def calc_path(self, debug, filename):
         if not self.grid.start_set:
-            print 'please set start and goal, or randomize'
+            print 'please set start and goal, or randomize grid'
             return
+
         if debug:
             filename.write('\nin A*\n')
+
         t = time.time()
+
         start = self.grid.start
         start.mindistance = 0.0
         start.h_value = self.heuristic(start)
@@ -90,6 +94,7 @@ class AStar(Algo):
                     filename.write('target: ' + str(target.x))
                     filename.write(', ' + str(target.y))
                     filename.write(' ' + str(time.time()) + '\n')
+
                 weight = 1.0
                 g = weight + u.mindistance
                 h = self.heuristic(target)
@@ -122,11 +127,14 @@ class AStar(Algo):
 class Dijkstra(Algo):
     def calc_path(self, debug, filename):
         if not self.grid.start_set:
-            print 'please set start and goal, or randomize'
+            print 'please set start and goal, or randomize grid'
             return
+        
         if debug:
             filename.write('\nin Dijkstra\n')
+        
         t = time.time()
+        
         start = self.grid.start
         start.mindistance = 0.0
         start.h_value = 0.0
@@ -136,6 +144,7 @@ class Dijkstra(Algo):
             u = heapq.heappop(priority_queue)
             self.visited.append(u)
             u.visited = True
+            
             if debug:
                 filename.write('u: ' + str(u.x) + ', ' + str(u.y))
                 filename.write(' ' + str(time.time()) + '\n')
@@ -148,6 +157,7 @@ class Dijkstra(Algo):
                     filename.write('target: ' + str(target.x))
                     filename.write(', ' + str(target.y))
                     filename.write(' ' + str(time.time()) + '\n')
+                
                 weight = 1.0
                 g = weight + u.mindistance
                 if not target.is_obs and g < target.mindistance:
@@ -159,6 +169,7 @@ class Dijkstra(Algo):
                     heapq.heappush(priority_queue, target)
 
         self.calctime = time.time() - t
+        
         u = self.grid.goal
         while u:
             u.in_result = True
@@ -169,9 +180,11 @@ class Dijkstra(Algo):
 class BestFirst(Algo):
     def calc_path(self, debug, filename):
         if not self.grid.start_set:
-            print 'please set start and goal, or randomize'
+            print 'please set start and goal, or randomize grid'
             return
+        
         t = time.time()
+        
         start = self.grid.start
         start.mindistance = 0.0
         start.h_value = self.heuristic(start)
@@ -197,6 +210,7 @@ class BestFirst(Algo):
                     heapq.heappush(priority_queue, target)
 
         self.calctime = time.time() - t
+        
         u = self.grid.goal
         while u:
             u.in_result = True
@@ -208,7 +222,13 @@ class BestFirst(Algo):
 
 
 def usage():
-    print 'usage'
+    print """USAGE:
+    python %s column row [flags]
+    
+    flags:
+        -p : print the gridmap
+        --debug or -d : debug mode
+    """ % sys.argv[0]
 
 
 def make_random_pick(row, col):
@@ -259,12 +279,15 @@ def main():
     dijk.grid.set_goal(ran_pick[-1][0], ran_pick[-1][1])
     astar.grid.set_goal(ran_pick[-1][0], ran_pick[-1][1])
 
-    print 'calc b'
+    print 'Calculating by Best-First-Search...'
     bfs.calc_path(debugmode, f)
-    print 'calc d'
+    print 'Finish!'
+    print 'Calculating by Dijkstra algorithm...'
     dijk.calc_path(debugmode, f)
-    print 'calc a'
+    print 'Finish!'
+    print 'Calculating by A* algorithm...'
     astar.calc_path(debugmode, f)
+    print 'Finish!'
 
     print
     print 'Result of Best-First-Search'
