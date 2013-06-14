@@ -119,6 +119,8 @@ class GridMap():
                     f.write('G ')
                 elif node.in_result:
                     f.write('* ')
+                elif node.visited:
+                    f.write('@ ')
                 else:
                     f.write('o ')
         f.close()

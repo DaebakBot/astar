@@ -78,16 +78,16 @@ class AStar(Algo):
         closedset = set()
 
         while openset:
-            u = heapq.heappop(openset)
+            u = heapq.heappop(openset)  # pop vertex whose h_value, g + h, is minimum 
             self.visited.append(u)
             u.visited = True
-            closedset.add(u)
+            closedset.add(u)  # u is calculated completely, so add it in closed set
 
             if debug:
                 filename.write('u: ' + str(u.x) + ', ' + str(u.y))
                 filename.write(' ' + str(time.time()) + '\n')
 
-            if u == self.grid.goal:
+            if u == self.grid.goal:  # goal
                 break
 
             for target in self.get_neighbors(u):
@@ -96,17 +96,17 @@ class AStar(Algo):
                     filename.write(', ' + str(target.y))
                     filename.write(' ' + str(time.time()) + '\n')
 
-                weight = 1.0
-                g = weight + u.mindistance
-                h = self.heuristic(target)
+                weight = 1.0  # default weight is 1.0
+                g = weight + u.mindistance  # g is real distance
+                h = self.heuristic(target)  # h is estimated value from target to goal
                 f = g + h
-                if not target.is_obs:
+                if not target.is_obs:  # cannot go through obstacles
                     if target.isopen or target in closedset:
-                        if target.mindistance > g:
+                        if target.mindistance > g:  # need to be update
                             target.h_value = f
                             target.mindistance = g
                             target.previous = u
-                    else:
+                    else:  # new vertex
                         target.isopen = True
                         target.h_value = f
                         target.mindistance = g
@@ -115,6 +115,8 @@ class AStar(Algo):
 
         self.calctime = time.time() - t
 
+        # reconstruct path
+        # follows vertices' previous
         u = self.grid.goal
         while u:
             u.in_result = True
@@ -122,6 +124,7 @@ class AStar(Algo):
             u = u.previous
 
     def heuristic(self, curr):
+        "estimate the distance from curr to goal"
         return (abs(curr.x - self.grid.goal.x) \
                 + abs(curr.y - self.grid.goal.y))
 
@@ -135,7 +138,7 @@ class Dijkstra(Algo):
         if debug:
             filename.write('\nin Dijkstra\n')
         
-        t = time.time()
+        t = time.time()  # saves start time
         
         start = self.grid.start
         start.mindistance = 0.0
@@ -143,7 +146,7 @@ class Dijkstra(Algo):
         priority_queue = [start]
 
         while priority_queue:
-            u = heapq.heappop(priority_queue)
+            u = heapq.heappop(priority_queue)  # pop vertex whose mindistance is minimum
             self.visited.append(u)
             u.visited = True
             
@@ -151,7 +154,7 @@ class Dijkstra(Algo):
                 filename.write('u: ' + str(u.x) + ', ' + str(u.y))
                 filename.write(' ' + str(time.time()) + '\n')
 
-            if u == self.grid.goal:
+            if u == self.grid.goal:  # goal
                 break
 
             for target in self.get_neighbors(u):
@@ -162,7 +165,7 @@ class Dijkstra(Algo):
                 
                 weight = 1.0
                 g = weight + u.mindistance
-                if not target.is_obs and g < target.mindistance:
+                if not target.is_obs and g < target.mindistance:  # don't care obstacles, and if g < target.mindistance then update needed
                     if target in priority_queue:
                         priority_queue.remove(target)
                     target.mindistance = g
@@ -171,7 +174,9 @@ class Dijkstra(Algo):
                     heapq.heappush(priority_queue, target)
 
         self.calctime = time.time() - t
-        
+
+        # reconstruct path
+        # following previous
         u = self.grid.goal
         while u:
             u.in_result = True
@@ -194,7 +199,7 @@ class BestFirst(Algo):
         closed = set()
 
         while priority_queue:
-            u = heapq.heappop(priority_queue)
+            u = heapq.heappop(priority_queue)  # pop vertex whose heuristic(vertex) is minimum
             self.visited.append(u)
             closed.add(u)
 
@@ -203,7 +208,7 @@ class BestFirst(Algo):
 
             for target in self.get_neighbors(u):
                 h = self.heuristic(target)
-                if not target.is_obs and target not in closed:
+                if not target.is_obs and target not in closed:  # not obstacle, not visited
                     if target in priority_queue:
                         priority_queue.remove(target)
                     target.mindistance = h
